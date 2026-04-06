@@ -2,8 +2,8 @@ openapi: 3.0.0
 
 info:
   title: Alumni Influencer Marketplace API
-  version: 1.2.0
-  description: API documentation for the Alumni Influencer Marketplace API
+  version: 1.0.0
+  description: Full API documentation for the Alumni Influencer Marketplace API
 
 servers:
   - url: http://localhost:5000
@@ -17,6 +17,26 @@ tags:
     description: Profile management endpoints
   - name: Degrees
     description: Degree management endpoints
+  - name: Employment
+    description: Employment history management endpoints
+  - name: Certifications
+    description: Certification management endpoints
+  - name: Courses
+    description: Short course management endpoints
+  - name: Licences
+    description: Licence management endpoints
+  - name: Bids
+    description: Blind bidding management endpoints
+  - name: Notifications
+    description: Notification management endpoints
+  - name: Analytics
+    description: Analytics endpoints
+  - name: Admin
+    description: Administrative endpoints
+  - name: API Keys
+    description: API key management endpoints
+  - name: Public
+    description: Public developer API endpoints
 
 components:
   securitySchemes:
@@ -26,6 +46,76 @@ components:
       bearerFormat: JWT
 
   schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Request successful
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Invalid request
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Validation failed
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: amount
+              message:
+                type: string
+                example: "\"amount\" is required"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 8d84d3c4-cf84-4c12-9bb1-3e9a5fa8fd9b
+        email:
+          type: string
+          format: email
+          example: student@university.ac.uk
+        role:
+          type: string
+          example: USER
+        isVerified:
+          type: boolean
+          example: true
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2026-03-21T10:30:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-03-21T08:00:00.000Z
+
     RegisterRequest:
       type: object
       required:
@@ -50,7 +140,7 @@ components:
       properties:
         token:
           type: string
-          example: 9f0d9f1c9b8e6b5a4d3c2b1a0f1234567890abcdef1234567890abcdef1234
+          example: secure_verification_token
 
     ResendVerificationRequest:
       type: object
@@ -94,7 +184,7 @@ components:
       properties:
         token:
           type: string
-          example: c4a2a442bc8d00ab1eaf4439d61a4f8dba9d1a6f2df77891d0d65b90b6aa12ff
+          example: secure_reset_token
         newPassword:
           type: string
           example: NewStrongPassword123!
@@ -112,6 +202,112 @@ components:
           type: string
           example: NewStrongPassword123!
 
+    RegisterResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+          example: User registered successfully. Please verify your email.
+        user:
+          $ref: '#/components/schemas/User'
+        verificationToken:
+          type: string
+          example: secure_verification_token
+
+    LoginResponseData:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.token
+        user:
+          $ref: '#/components/schemas/User'
+
+    ForgotPasswordResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+          example: If the account exists, a password reset link has been generated
+        resetToken:
+          type: string
+          example: secure_reset_token
+
+    SimpleMessageData:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Operation completed successfully
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7c2d0ad8-7f3c-4fd5-9bd2-0d258c7f8a11
+        userId:
+          type: string
+          format: uuid
+          example: 8d84d3c4-cf84-4c12-9bb1-3e9a5fa8fd9b
+        fullName:
+          type: string
+          example: Shanel Silva
+        biography:
+          type: string
+          nullable: true
+          example: Full-stack software engineer
+        linkedInUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://www.linkedin.com/in/shanel-silva
+        profileImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/profile.jpg
+        currentJobTitle:
+          type: string
+          nullable: true
+          example: Software Engineer
+        currentCompany:
+          type: string
+          nullable: true
+          example: Example Company
+        profileCompletenessScore:
+          type: integer
+          example: 85
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-04-02T10:00:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-04-02T10:30:00.000Z
+        degrees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Degree'
+        certifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certification'
+        licences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Licence'
+        shortCourses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+        employmentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmploymentHistory'
+
     CreateProfileRequest:
       type: object
       required:
@@ -123,7 +319,7 @@ components:
         biography:
           type: string
           nullable: true
-          example: Full-stack software engineer with a strong interest in alumni and creator platforms.
+          example: Full-stack engineer
         linkedInUrl:
           type: string
           format: uri
@@ -133,7 +329,7 @@ components:
           type: string
           format: uri
           nullable: true
-          example: https://example.com/images/profile.jpg
+          example: https://example.com/profile.jpg
         currentJobTitle:
           type: string
           nullable: true
@@ -141,7 +337,7 @@ components:
         currentCompany:
           type: string
           nullable: true
-          example: Novacode Pvt Ltd
+          example: Example Company
 
     UpdateProfileRequest:
       type: object
@@ -152,7 +348,7 @@ components:
         biography:
           type: string
           nullable: true
-          example: Updated bio content
+          example: Updated biography
         linkedInUrl:
           type: string
           format: uri
@@ -162,7 +358,7 @@ components:
           type: string
           format: uri
           nullable: true
-          example: https://example.com/images/profile-updated.jpg
+          example: https://example.com/profile.jpg
         currentJobTitle:
           type: string
           nullable: true
@@ -170,73 +366,7 @@ components:
         currentCompany:
           type: string
           nullable: true
-          example: Alumni Marketplace Ltd
-
-    CreateDegreeRequest:
-      type: object
-      required:
-        - institution
-        - degreeName
-        - startDate
-      properties:
-        institution:
-          type: string
-          example: University of Westminster
-        degreeName:
-          type: string
-          example: Bachelor of Engineering
-        fieldOfStudy:
-          type: string
-          nullable: true
-          example: Software Engineering
-        startDate:
-          type: string
-          format: date
-          example: 2020-09-01
-        endDate:
-          type: string
-          format: date
-          nullable: true
-          example: 2024-06-30
-        grade:
-          type: string
-          nullable: true
-          example: First Class
-        description:
-          type: string
-          nullable: true
-          example: Specialized in software engineering, distributed systems, and AI-related modules.
-
-    UpdateDegreeRequest:
-      type: object
-      properties:
-        institution:
-          type: string
-          example: University of Westminster
-        degreeName:
-          type: string
-          example: Bachelor of Engineering
-        fieldOfStudy:
-          type: string
-          nullable: true
-          example: Software Engineering
-        startDate:
-          type: string
-          format: date
-          example: 2020-09-01
-        endDate:
-          type: string
-          format: date
-          nullable: true
-          example: 2024-06-30
-        grade:
-          type: string
-          nullable: true
-          example: First Class
-        description:
-          type: string
-          nullable: true
-          example: Updated academic description.
+          example: Updated Company
 
     Degree:
       type: object
@@ -275,7 +405,7 @@ components:
         description:
           type: string
           nullable: true
-          example: Specialized in software engineering, distributed systems, and AI-related modules.
+          example: Specialized in software engineering
         createdAt:
           type: string
           format: date-time
@@ -285,208 +415,637 @@ components:
           format: date-time
           example: 2026-04-06T10:30:00.000Z
 
-    Certification:
+    CreateDegreeRequest:
       type: object
+      required:
+        - institution
+        - degreeName
+        - startDate
       properties:
-        id:
+        institution:
           type: string
-          example: e8621d8d-4f8e-4d3b-b0cf-b6cb4a9ff101
+          example: University of Westminster
+        degreeName:
+          type: string
+          example: Bachelor of Engineering
+        fieldOfStudy:
+          type: string
+          nullable: true
+          example: Software Engineering
+        startDate:
+          type: string
+          format: date
+          example: 2020-09-01
+        endDate:
+          type: string
+          format: date
+          nullable: true
+          example: 2024-06-30
+        grade:
+          type: string
+          nullable: true
+          example: First Class
+        description:
+          type: string
+          nullable: true
+          example: Specialized in software engineering
 
-    Licence:
+    UpdateDegreeRequest:
       type: object
       properties:
-        id:
+        institution:
           type: string
-          example: 1b7ab7ec-705d-48f2-8d32-d4d5ef7f7f90
-
-    ShortCourse:
-      type: object
-      properties:
-        id:
+        degreeName:
           type: string
-          example: 6ef1ec6c-7a38-4992-a0e1-51653f4f7cd2
+        fieldOfStudy:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        grade:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
 
     EmploymentHistory:
       type: object
       properties:
         id:
           type: string
-          example: ffe23d1d-4f63-4284-8d46-f32fbbf079dd
-
-    User:
-      type: object
-      properties:
-        id:
+          format: uuid
+        profileId:
           type: string
-          example: 8d84d3c4-cf84-4c12-9bb1-3e9a5fa8fd9b
-        email:
+          format: uuid
+        companyName:
           type: string
-          format: email
-          example: student@university.ac.uk
-        role:
+          example: Example Company
+        jobTitle:
           type: string
-          example: USER
-        isVerified:
+          example: Software Engineer
+        employmentType:
+          type: string
+          example: FULL_TIME
+        location:
+          type: string
+          nullable: true
+          example: London
+        startDate:
+          type: string
+          format: date
+          example: 2024-01-01
+        endDate:
+          type: string
+          format: date
+          nullable: true
+          example: 2025-01-01
+        isCurrent:
           type: boolean
           example: false
-        lastLoginAt:
+        description:
           type: string
-          format: date-time
           nullable: true
-          example: 2026-03-21T10:30:00.000Z
+          example: Built backend systems
         createdAt:
           type: string
           format: date-time
-          example: 2026-03-21T08:00:00.000Z
-
-    Profile:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: 7c2d0ad8-7f3c-4fd5-9bd2-0d258c7f8a11
-        userId:
-          type: string
-          format: uuid
-          example: 8d84d3c4-cf84-4c12-9bb1-3e9a5fa8fd9b
-        fullName:
-          type: string
-          example: Shanel Silva
-        biography:
-          type: string
-          nullable: true
-          example: Full-stack software engineer with a strong interest in alumni and creator platforms.
-        linkedInUrl:
-          type: string
-          format: uri
-          nullable: true
-          example: https://www.linkedin.com/in/shanel-silva
-        profileImageUrl:
-          type: string
-          format: uri
-          nullable: true
-          example: https://example.com/images/profile.jpg
-        currentJobTitle:
-          type: string
-          nullable: true
-          example: Software Engineer
-        currentCompany:
-          type: string
-          nullable: true
-          example: Novacode Pvt Ltd
-        profileCompletenessScore:
-          type: integer
-          example: 67
-        createdAt:
-          type: string
-          format: date-time
-          example: 2026-04-02T10:00:00.000Z
         updatedAt:
           type: string
           format: date-time
-          example: 2026-04-02T10:30:00.000Z
-        degrees:
-          type: array
-          items:
-            $ref: '#/components/schemas/Degree'
-        certifications:
-          type: array
-          items:
-            $ref: '#/components/schemas/Certification'
-        licences:
-          type: array
-          items:
-            $ref: '#/components/schemas/Licence'
-        shortCourses:
-          type: array
-          items:
-            $ref: '#/components/schemas/ShortCourse'
-        employmentHistory:
-          type: array
-          items:
-            $ref: '#/components/schemas/EmploymentHistory'
 
-    RegisterResponseData:
+    CreateEmploymentRequest:
       type: object
+      required:
+        - companyName
+        - jobTitle
+        - startDate
       properties:
-        message:
+        companyName:
           type: string
-          example: User registered successfully. Please verify your email.
-        user:
-          $ref: '#/components/schemas/User'
-        verificationToken:
+          example: Example Company
+        jobTitle:
           type: string
-          example: 9f0d9f1c9b8e6b5a4d3c2b1a0f1234567890abcdef1234567890abcdef1234
-
-    LoginResponseData:
-      type: object
-      properties:
-        token:
+          example: Software Engineer
+        employmentType:
           type: string
-          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.token
-        user:
-          $ref: '#/components/schemas/User'
-
-    ForgotPasswordResponseData:
-      type: object
-      properties:
-        message:
+          enum:
+            - FULL_TIME
+            - PART_TIME
+            - CONTRACT
+            - INTERNSHIP
+            - FREELANCE
+            - TEMPORARY
+            - VOLUNTEER
+            - OTHER
+        location:
           type: string
-          example: If the account exists, a password reset link has been generated
-        resetToken:
+          nullable: true
+          example: London
+        startDate:
           type: string
-          example: c4a2a442bc8d00ab1eaf4439d61a4f8dba9d1a6f2df77891d0d65b90b6aa12ff
-
-    SimpleMessageData:
-      type: object
-      properties:
-        message:
+          format: date
+          example: 2024-01-01
+        endDate:
           type: string
-          example: Operation completed successfully
-
-    SuccessResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: success
-        message:
-          type: string
-          example: Request successful
-        data:
-          type: object
-
-    ErrorResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        message:
-          type: string
-          example: Invalid request
-
-    ValidationErrorResponse:
-      type: object
-      properties:
-        success:
+          format: date
+          nullable: true
+          example: 2025-01-01
+        isCurrent:
           type: boolean
           example: false
+        description:
+          type: string
+          nullable: true
+          example: Built backend systems
+
+    UpdateEmploymentRequest:
+      type: object
+      properties:
+        companyName:
+          type: string
+        jobTitle:
+          type: string
+        employmentType:
+          type: string
+          enum:
+            - FULL_TIME
+            - PART_TIME
+            - CONTRACT
+            - INTERNSHIP
+            - FREELANCE
+            - TEMPORARY
+            - VOLUNTEER
+            - OTHER
+        location:
+          type: string
+          nullable: true
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        isCurrent:
+          type: boolean
+        description:
+          type: string
+          nullable: true
+
+    Certification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        profileId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: AWS Cloud Practitioner
+        providerName:
+          type: string
+          example: Amazon Web Services
+        courseUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://aws.amazon.com
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2025-01-10T00:00:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateCertificationRequest:
+      type: object
+      required:
+        - title
+        - providerName
+      properties:
+        title:
+          type: string
+          example: AWS Cloud Practitioner
+        providerName:
+          type: string
+          example: Amazon Web Services
+        courseUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://aws.amazon.com
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2025-01-10T00:00:00.000Z
+
+    UpdateCertificationRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        providerName:
+          type: string
+        courseUrl:
+          type: string
+          format: uri
+          nullable: true
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        profileId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Advanced Node.js
+        providerName:
+          type: string
+          example: Coursera
+        courseUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://coursera.org
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2025-02-01T00:00:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateCourseRequest:
+      type: object
+      required:
+        - title
+        - providerName
+      properties:
+        title:
+          type: string
+          example: Advanced Node.js
+        providerName:
+          type: string
+          example: Coursera
+        courseUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://coursera.org
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2025-02-01T00:00:00.000Z
+
+    UpdateCourseRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        providerName:
+          type: string
+        courseUrl:
+          type: string
+          format: uri
+          nullable: true
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+
+    Licence:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        profileId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Professional Licence
+        awardingBody:
+          type: string
+          example: BCS
+        awardingBodyUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://www.bcs.org
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2025-03-01T00:00:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateLicenceRequest:
+      type: object
+      required:
+        - title
+        - awardingBody
+      properties:
+        title:
+          type: string
+          example: Professional Licence
+        awardingBody:
+          type: string
+          example: BCS
+        awardingBodyUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://www.bcs.org
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2025-03-01T00:00:00.000Z
+
+    UpdateLicenceRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        awardingBody:
+          type: string
+        awardingBodyUrl:
+          type: string
+          format: uri
+          nullable: true
+        completionDate:
+          type: string
+          format: date-time
+          nullable: true
+
+    Bid:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        bidDate:
+          type: string
+          format: date-time
+        amount:
+          type: number
+          format: double
+          example: 250.00
+        status:
+          type: string
+          example: PENDING
+        isActive:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateBidRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 250.00
+
+    UpdateBidRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 300.00
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Bid Updated
         message:
           type: string
-          example: Validation failed
-        errors:
-          type: array
-          items:
-            type: object
-            properties:
-              field:
-                type: string
-                example: fullName
-              message:
-                type: string
-                example: "\"fullName\" is required"
+          example: Your bid was updated successfully.
+        type:
+          type: string
+          example: BID_UPDATED
+        isRead:
+          type: boolean
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateNotificationRequest:
+      type: object
+      required:
+        - title
+        - message
+        - type
+      properties:
+        title:
+          type: string
+          example: Bid Updated
+        message:
+          type: string
+          example: Your bid was updated successfully.
+        type:
+          type: string
+          enum:
+            - BID_CREATED
+            - BID_UPDATED
+            - BID_CANCELLED
+            - BID_WON
+            - BID_LOST
+
+    AnalyticsDashboard:
+      type: object
+      properties:
+        profile:
+          type: object
+          properties:
+            exists:
+              type: boolean
+              example: true
+            completenessPercentage:
+              type: number
+              example: 85
+            fullName:
+              type: string
+              nullable: true
+              example: Shanel Silva
+            currentJobTitle:
+              type: string
+              nullable: true
+              example: Software Engineer
+            currentCompany:
+              type: string
+              nullable: true
+              example: Example Company
+            totalDegrees:
+              type: integer
+              example: 1
+            totalEmploymentHistory:
+              type: integer
+              example: 2
+            totalCertifications:
+              type: integer
+              example: 3
+            totalCourses:
+              type: integer
+              example: 1
+            totalLicences:
+              type: integer
+              example: 1
+        bids:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 5
+            active:
+              type: integer
+              example: 1
+            won:
+              type: integer
+              example: 1
+            lost:
+              type: integer
+              example: 2
+            cancelled:
+              type: integer
+              example: 1
+        notifications:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 7
+            unread:
+              type: integer
+              example: 2
+            read:
+              type: integer
+              example: 5
+
+    AdminDashboard:
+      type: object
+      properties:
+        users:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 15
+        profiles:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 12
+        bids:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 30
+        notifications:
+          type: object
+          properties:
+            total:
+              type: integer
+              example: 50
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: AR Client Key
+        key:
+          type: string
+          example: aim_abcdef1234567890
+        isActive:
+          type: boolean
+          example: true
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        revokedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateApiKeyRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: AR Client Key
 
 paths:
   /:
@@ -502,25 +1061,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
 
-  /api/health:
-    get:
-      tags:
-        - System
-      summary: Health check
-      responses:
-        '200':
-          description: API healthy
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-
   /api/auth/register:
     post:
       tags:
         - Auth
       summary: Register a new user
-      description: Register a new user with a university email and strong password
       requestBody:
         required: true
         content:
@@ -533,35 +1078,18 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: User registered successfully. Please verify your email.
-                  data:
-                    $ref: '#/components/schemas/RegisterResponseData'
-        '400':
-          description: Invalid email domain or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: User already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RegisterResponseData'
 
   /api/auth/verify-email:
     post:
       tags:
         - Auth
-      summary: Verify user email
-      description: Verify a user's email address using a verification token
+      summary: Verify email
       requestBody:
         required: true
         content:
@@ -574,35 +1102,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: Email verified successfully
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Email verified successfully
-                      user:
-                        $ref: '#/components/schemas/User'
-        '400':
-          description: Invalid, used, or expired token
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/auth/resend-verification:
     post:
       tags:
         - Auth
       summary: Resend verification email
-      description: Generate a fresh email verification token for an unverified account
       requestBody:
         required: true
         content:
@@ -615,42 +1121,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: Verification email has been resent
-                  data:
-                    type: object
-                    properties:
-                      message:
-                        type: string
-                        example: Verification email has been resent
-                      verificationToken:
-                        type: string
-                        example: 9f0d9f1c9b8e6b5a4d3c2b1a0f1234567890abcdef1234567890abcdef1234
-        '400':
-          description: Email already verified
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/auth/login:
     post:
       tags:
         - Auth
       summary: Login user
-      description: Login with verified email and password to receive a JWT
       requestBody:
         required: true
         content:
@@ -663,41 +1140,18 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: Login successful
-                  data:
-                    $ref: '#/components/schemas/LoginResponseData'
-        '401':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '403':
-          description: Email not verified
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '423':
-          description: Account temporarily locked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LoginResponseData'
 
   /api/auth/logout:
     post:
       tags:
         - Auth
       summary: Logout user
-      description: Logout the currently authenticated user
       security:
         - bearerAuth: []
       responses:
@@ -706,60 +1160,33 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: Logout successful
-                  data:
-                    $ref: '#/components/schemas/SimpleMessageData'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/auth/me:
     get:
       tags:
         - Auth
       summary: Get current user
-      description: Return the currently authenticated user
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Current user fetched successfully
+          description: Current user
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: Current user fetched successfully
-                  data:
-                    $ref: '#/components/schemas/User'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/User'
 
   /api/auth/forgot-password:
     post:
       tags:
         - Auth
       summary: Forgot password
-      description: Generate a password reset token for an account if it exists
       requestBody:
         required: true
         content:
@@ -768,27 +1195,22 @@ paths:
               $ref: '#/components/schemas/ForgotPasswordRequest'
       responses:
         '200':
-          description: Password reset flow initiated
+          description: Forgot password initiated
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: If the account exists, a password reset link has been generated
-                  data:
-                    $ref: '#/components/schemas/ForgotPasswordResponseData'
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ForgotPasswordResponseData'
 
   /api/auth/reset-password:
     post:
       tags:
         - Auth
       summary: Reset password
-      description: Reset the password using a valid reset token
       requestBody:
         required: true
         content:
@@ -797,39 +1219,17 @@ paths:
               $ref: '#/components/schemas/ResetPasswordRequest'
       responses:
         '200':
-          description: Password reset successfully
+          description: Password reset successful
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: Password reset successfully
-                  data:
-                    $ref: '#/components/schemas/SimpleMessageData'
-        '400':
-          description: Invalid, expired, used token, or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/auth/change-password:
     post:
       tags:
         - Auth
       summary: Change password
-      description: Change the password for the currently authenticated user
       security:
         - bearerAuth: []
       requestBody:
@@ -844,35 +1244,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: success
-                  message:
-                    type: string
-                    example: Password changed successfully
-                  data:
-                    $ref: '#/components/schemas/SimpleMessageData'
-        '400':
-          description: Current password incorrect or new password weak
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/profiles:
     post:
       tags:
         - Profiles
       summary: Create profile
-      description: Create a profile for the currently authenticated user
       security:
         - bearerAuth: []
       requestBody:
@@ -883,68 +1261,31 @@ paths:
               $ref: '#/components/schemas/CreateProfileRequest'
       responses:
         '201':
-          description: Profile created successfully
+          description: Profile created
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Profile created successfully
-                  data:
-                    $ref: '#/components/schemas/Profile'
-        '400':
-          description: Validation failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: Profile already exists for this user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Profile'
     get:
       tags:
         - Profiles
       summary: Get all profiles
-      description: Retrieve all profiles
       responses:
         '200':
-          description: Profiles fetched successfully
+          description: Profiles fetched
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Profiles fetched successfully
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Profile'
-
+                $ref: '#/components/schemas/SuccessResponse'
     patch:
       tags:
         - Profiles
       summary: Update own profile
-      description: Update the currently authenticated user's profile
       security:
         - bearerAuth: []
       requestBody:
@@ -955,116 +1296,45 @@ paths:
               $ref: '#/components/schemas/UpdateProfileRequest'
       responses:
         '200':
-          description: Profile updated successfully
+          description: Profile updated
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Profile updated successfully
-                  data:
-                    $ref: '#/components/schemas/Profile'
-        '400':
-          description: Validation failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Profile not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
+                $ref: '#/components/schemas/SuccessResponse'
     delete:
       tags:
         - Profiles
       summary: Delete own profile
-      description: Delete the currently authenticated user's profile
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Profile deleted successfully
+          description: Profile deleted
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Profile deleted successfully
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Profile not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/profiles/me:
     get:
       tags:
         - Profiles
       summary: Get own profile
-      description: Retrieve the currently authenticated user's profile
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Profile fetched successfully
+          description: Profile fetched
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Profile fetched successfully
-                  data:
-                    $ref: '#/components/schemas/Profile'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Profile not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/profiles/{id}:
     get:
       tags:
         - Profiles
       summary: Get profile by ID
-      description: Retrieve a single profile by its UUID
       parameters:
         - in: path
           name: id
@@ -1072,42 +1342,19 @@ paths:
           schema:
             type: string
             format: uuid
-          example: 7c2d0ad8-7f3c-4fd5-9bd2-0d258c7f8a11
       responses:
         '200':
-          description: Profile fetched successfully
+          description: Profile fetched
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Profile fetched successfully
-                  data:
-                    $ref: '#/components/schemas/Profile'
-        '400':
-          description: Invalid profile ID
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-        '404':
-          description: Profile not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/degrees:
     post:
       tags:
         - Degrees
       summary: Create degree
-      description: Create a degree for the currently authenticated user's profile
       security:
         - bearerAuth: []
       requestBody:
@@ -1118,84 +1365,32 @@ paths:
               $ref: '#/components/schemas/CreateDegreeRequest'
       responses:
         '201':
-          description: Degree created successfully
+          description: Degree created
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Degree created successfully
-                  data:
-                    $ref: '#/components/schemas/Degree'
-        '400':
-          description: Validation failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Profile not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/degrees/my:
     get:
       tags:
         - Degrees
       summary: Get my degrees
-      description: Retrieve all degrees belonging to the currently authenticated user's profile
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Degrees fetched successfully
+          description: Degrees fetched
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Degrees fetched successfully
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Degree'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Profile not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/degrees/profile/{profileId}:
     get:
       tags:
         - Degrees
       summary: Get degrees by profile ID
-      description: Retrieve all degrees for a given public profile
       parameters:
         - in: path
           name: profileId
@@ -1203,44 +1398,19 @@ paths:
           schema:
             type: string
             format: uuid
-          example: 7c2d0ad8-7f3c-4fd5-9bd2-0d258c7f8a11
       responses:
         '200':
-          description: Degrees fetched successfully
+          description: Degrees fetched
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Degrees fetched successfully
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Degree'
-        '400':
-          description: Invalid profile ID
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-        '404':
-          description: Profile not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
 
   /api/degrees/{id}:
     patch:
       tags:
         - Degrees
       summary: Update degree
-      description: Update a degree belonging to the currently authenticated user's profile
       security:
         - bearerAuth: []
       parameters:
@@ -1250,7 +1420,6 @@ paths:
           schema:
             type: string
             format: uuid
-          example: 2b7eb1a1-b6f6-4dd8-a2f5-7a1f8cc77401
       requestBody:
         required: true
         content:
@@ -1259,44 +1428,15 @@ paths:
               $ref: '#/components/schemas/UpdateDegreeRequest'
       responses:
         '200':
-          description: Degree updated successfully
+          description: Degree updated
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Degree updated successfully
-                  data:
-                    $ref: '#/components/schemas/Degree'
-        '400':
-          description: Validation failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Degree or profile not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
+                $ref: '#/components/schemas/SuccessResponse'
     delete:
       tags:
         - Degrees
       summary: Delete degree
-      description: Delete a degree belonging to the currently authenticated user's profile
       security:
         - bearerAuth: []
       parameters:
@@ -1306,36 +1446,877 @@ paths:
           schema:
             type: string
             format: uuid
-          example: 2b7eb1a1-b6f6-4dd8-a2f5-7a1f8cc77401
       responses:
         '200':
-          description: Degree deleted successfully
+          description: Degree deleted
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  message:
-                    type: string
-                    example: Degree deleted successfully
-        '400':
-          description: Invalid degree ID
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/employment:
+    post:
+      tags:
+        - Employment
+      summary: Create employment history
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmploymentRequest'
+      responses:
+        '201':
+          description: Employment created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
-        '401':
-          description: Unauthorized
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/employment/my:
+    get:
+      tags:
+        - Employment
+      summary: Get my employment history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Employment history fetched
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Degree or profile not found
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/employment/profile/{profileId}:
+    get:
+      tags:
+        - Employment
+      summary: Get employment history by profile ID
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Employment history fetched
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/employment/{id}:
+    patch:
+      tags:
+        - Employment
+      summary: Update employment history
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmploymentRequest'
+      responses:
+        '200':
+          description: Employment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    delete:
+      tags:
+        - Employment
+      summary: Delete employment history
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Employment deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/certifications:
+    post:
+      tags:
+        - Certifications
+      summary: Create certification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCertificationRequest'
+      responses:
+        '201':
+          description: Certification created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/certifications/my:
+    get:
+      tags:
+        - Certifications
+      summary: Get my certifications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Certifications fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/certifications/profile/{profileId}:
+    get:
+      tags:
+        - Certifications
+      summary: Get certifications by profile ID
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Certifications fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/certifications/{id}:
+    patch:
+      tags:
+        - Certifications
+      summary: Update certification
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCertificationRequest'
+      responses:
+        '200':
+          description: Certification updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    delete:
+      tags:
+        - Certifications
+      summary: Delete certification
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Certification deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/courses:
+    post:
+      tags:
+        - Courses
+      summary: Create course
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseRequest'
+      responses:
+        '201':
+          description: Course created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/courses/my:
+    get:
+      tags:
+        - Courses
+      summary: Get my courses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Courses fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/courses/profile/{profileId}:
+    get:
+      tags:
+        - Courses
+      summary: Get courses by profile ID
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Courses fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/courses/{id}:
+    patch:
+      tags:
+        - Courses
+      summary: Update course
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCourseRequest'
+      responses:
+        '200':
+          description: Course updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    delete:
+      tags:
+        - Courses
+      summary: Delete course
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Course deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/licences:
+    post:
+      tags:
+        - Licences
+      summary: Create licence
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLicenceRequest'
+      responses:
+        '201':
+          description: Licence created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/licences/my:
+    get:
+      tags:
+        - Licences
+      summary: Get my licences
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Licences fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/licences/profile/{profileId}:
+    get:
+      tags:
+        - Licences
+      summary: Get licences by profile ID
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Licences fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/licences/{id}:
+    patch:
+      tags:
+        - Licences
+      summary: Update licence
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLicenceRequest'
+      responses:
+        '200':
+          description: Licence updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    delete:
+      tags:
+        - Licences
+      summary: Delete licence
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Licence deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/bids:
+    post:
+      tags:
+        - Bids
+      summary: Create bid
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBidRequest'
+      responses:
+        '201':
+          description: Bid created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/bids/my:
+    get:
+      tags:
+        - Bids
+      summary: Get my bids
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Bids fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/bids/my/active:
+    get:
+      tags:
+        - Bids
+      summary: Get my active bids
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active bids fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/bids/{id}:
+    get:
+      tags:
+        - Bids
+      summary: Get bid by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Bid fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    patch:
+      tags:
+        - Bids
+      summary: Update bid
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBidRequest'
+      responses:
+        '200':
+          description: Bid updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+    delete:
+      tags:
+        - Bids
+      summary: Delete bid
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Bid deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/bids/{id}/deactivate:
+    patch:
+      tags:
+        - Bids
+      summary: Deactivate bid
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Bid deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/notifications:
+    post:
+      tags:
+        - Notifications
+      summary: Create notification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationRequest'
+      responses:
+        '201':
+          description: Notification created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/notifications/my:
+    get:
+      tags:
+        - Notifications
+      summary: Get my notifications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/notifications/my/unread:
+    get:
+      tags:
+        - Notifications
+      summary: Get my unread notifications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Unread notifications fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/notifications/{id}/read:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark notification as read
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/notifications/read-all:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark all notifications as read
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications marked as read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/notifications/{id}:
+    delete:
+      tags:
+        - Notifications
+      summary: Delete notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Notification deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/analytics/my-dashboard:
+    get:
+      tags:
+        - Analytics
+      summary: Get my dashboard analytics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard analytics fetched
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AnalyticsDashboard'
+
+  /api/admin/users:
+    get:
+      tags:
+        - Admin
+      summary: Get all users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Users fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/admin/bids:
+    get:
+      tags:
+        - Admin
+      summary: Get all bids
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Bids fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/admin/notifications:
+    get:
+      tags:
+        - Admin
+      summary: Get all notifications
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/admin/dashboard:
+    get:
+      tags:
+        - Admin
+      summary: Get admin dashboard
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Admin dashboard fetched
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AdminDashboard'
+
+  /api/api-keys:
+    post:
+      tags:
+        - API Keys
+      summary: Create API key
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '201':
+          description: API key created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/api-keys/my:
+    get:
+      tags:
+        - API Keys
+      summary: Get my API keys
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: API keys fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/api-keys/my/active:
+    get:
+      tags:
+        - API Keys
+      summary: Get my active API keys
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active API keys fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/api-keys/{id}/revoke:
+    patch:
+      tags:
+        - API Keys
+      summary: Revoke API key
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: API key revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/api-keys/{id}:
+    delete:
+      tags:
+        - API Keys
+      summary: Delete API key
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: API key deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/public/profiles/{profileId}/certifications:
+    get:
+      tags:
+        - Public
+      summary: Get public certifications by profile ID
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Public certifications fetched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
