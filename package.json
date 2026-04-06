@@ -30,6 +30,10 @@
   "bugs": {
     "url": "https://github.com/ShanelSillva123/alumni-influencer-marketplace-api/issues"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "clearMocks": true
+  },
   "homepage": "https://github.com/ShanelSillva123/alumni-influencer-marketplace-api#readme",
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
