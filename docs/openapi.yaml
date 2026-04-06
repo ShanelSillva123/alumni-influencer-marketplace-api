@@ -1,20 +1,1341 @@
 openapi: 3.0.0
+
 info:
   title: Alumni Influencer Marketplace API
-  version: 1.0.0
+  version: 1.2.0
   description: API documentation for the Alumni Influencer Marketplace API
+
 servers:
   - url: http://localhost:5000
+
+tags:
+  - name: System
+    description: System endpoints
+  - name: Auth
+    description: Authentication and account management
+  - name: Profiles
+    description: Profile management endpoints
+  - name: Degrees
+    description: Degree management endpoints
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@university.ac.uk
+        password:
+          type: string
+          example: StrongPassword123!
+        role:
+          type: string
+          example: USER
+
+    VerifyEmailRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: 9f0d9f1c9b8e6b5a4d3c2b1a0f1234567890abcdef1234567890abcdef1234
+
+    ResendVerificationRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@university.ac.uk
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@university.ac.uk
+        password:
+          type: string
+          example: StrongPassword123!
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@university.ac.uk
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+          example: c4a2a442bc8d00ab1eaf4439d61a4f8dba9d1a6f2df77891d0d65b90b6aa12ff
+        newPassword:
+          type: string
+          example: NewStrongPassword123!
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          example: StrongPassword123!
+        newPassword:
+          type: string
+          example: NewStrongPassword123!
+
+    CreateProfileRequest:
+      type: object
+      required:
+        - fullName
+      properties:
+        fullName:
+          type: string
+          example: Shanel Silva
+        biography:
+          type: string
+          nullable: true
+          example: Full-stack software engineer with a strong interest in alumni and creator platforms.
+        linkedInUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://www.linkedin.com/in/shanel-silva
+        profileImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/images/profile.jpg
+        currentJobTitle:
+          type: string
+          nullable: true
+          example: Software Engineer
+        currentCompany:
+          type: string
+          nullable: true
+          example: Novacode Pvt Ltd
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          example: Shanel Silva
+        biography:
+          type: string
+          nullable: true
+          example: Updated bio content
+        linkedInUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://www.linkedin.com/in/shanel-silva
+        profileImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/images/profile-updated.jpg
+        currentJobTitle:
+          type: string
+          nullable: true
+          example: Senior Software Engineer
+        currentCompany:
+          type: string
+          nullable: true
+          example: Alumni Marketplace Ltd
+
+    CreateDegreeRequest:
+      type: object
+      required:
+        - institution
+        - degreeName
+        - startDate
+      properties:
+        institution:
+          type: string
+          example: University of Westminster
+        degreeName:
+          type: string
+          example: Bachelor of Engineering
+        fieldOfStudy:
+          type: string
+          nullable: true
+          example: Software Engineering
+        startDate:
+          type: string
+          format: date
+          example: 2020-09-01
+        endDate:
+          type: string
+          format: date
+          nullable: true
+          example: 2024-06-30
+        grade:
+          type: string
+          nullable: true
+          example: First Class
+        description:
+          type: string
+          nullable: true
+          example: Specialized in software engineering, distributed systems, and AI-related modules.
+
+    UpdateDegreeRequest:
+      type: object
+      properties:
+        institution:
+          type: string
+          example: University of Westminster
+        degreeName:
+          type: string
+          example: Bachelor of Engineering
+        fieldOfStudy:
+          type: string
+          nullable: true
+          example: Software Engineering
+        startDate:
+          type: string
+          format: date
+          example: 2020-09-01
+        endDate:
+          type: string
+          format: date
+          nullable: true
+          example: 2024-06-30
+        grade:
+          type: string
+          nullable: true
+          example: First Class
+        description:
+          type: string
+          nullable: true
+          example: Updated academic description.
+
+    Degree:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 2b7eb1a1-b6f6-4dd8-a2f5-7a1f8cc77401
+        profileId:
+          type: string
+          format: uuid
+          example: 7c2d0ad8-7f3c-4fd5-9bd2-0d258c7f8a11
+        institution:
+          type: string
+          example: University of Westminster
+        degreeName:
+          type: string
+          example: Bachelor of Engineering
+        fieldOfStudy:
+          type: string
+          nullable: true
+          example: Software Engineering
+        startDate:
+          type: string
+          format: date
+          example: 2020-09-01
+        endDate:
+          type: string
+          format: date
+          nullable: true
+          example: 2024-06-30
+        grade:
+          type: string
+          nullable: true
+          example: First Class
+        description:
+          type: string
+          nullable: true
+          example: Specialized in software engineering, distributed systems, and AI-related modules.
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-04-06T10:00:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-04-06T10:30:00.000Z
+
+    Certification:
+      type: object
+      properties:
+        id:
+          type: string
+          example: e8621d8d-4f8e-4d3b-b0cf-b6cb4a9ff101
+
+    Licence:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 1b7ab7ec-705d-48f2-8d32-d4d5ef7f7f90
+
+    ShortCourse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6ef1ec6c-7a38-4992-a0e1-51653f4f7cd2
+
+    EmploymentHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ffe23d1d-4f63-4284-8d46-f32fbbf079dd
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 8d84d3c4-cf84-4c12-9bb1-3e9a5fa8fd9b
+        email:
+          type: string
+          format: email
+          example: student@university.ac.uk
+        role:
+          type: string
+          example: USER
+        isVerified:
+          type: boolean
+          example: false
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: 2026-03-21T10:30:00.000Z
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-03-21T08:00:00.000Z
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7c2d0ad8-7f3c-4fd5-9bd2-0d258c7f8a11
+        userId:
+          type: string
+          format: uuid
+          example: 8d84d3c4-cf84-4c12-9bb1-3e9a5fa8fd9b
+        fullName:
+          type: string
+          example: Shanel Silva
+        biography:
+          type: string
+          nullable: true
+          example: Full-stack software engineer with a strong interest in alumni and creator platforms.
+        linkedInUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://www.linkedin.com/in/shanel-silva
+        profileImageUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/images/profile.jpg
+        currentJobTitle:
+          type: string
+          nullable: true
+          example: Software Engineer
+        currentCompany:
+          type: string
+          nullable: true
+          example: Novacode Pvt Ltd
+        profileCompletenessScore:
+          type: integer
+          example: 67
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-04-02T10:00:00.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-04-02T10:30:00.000Z
+        degrees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Degree'
+        certifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Certification'
+        licences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Licence'
+        shortCourses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShortCourse'
+        employmentHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmploymentHistory'
+
+    RegisterResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+          example: User registered successfully. Please verify your email.
+        user:
+          $ref: '#/components/schemas/User'
+        verificationToken:
+          type: string
+          example: 9f0d9f1c9b8e6b5a4d3c2b1a0f1234567890abcdef1234567890abcdef1234
+
+    LoginResponseData:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.token
+        user:
+          $ref: '#/components/schemas/User'
+
+    ForgotPasswordResponseData:
+      type: object
+      properties:
+        message:
+          type: string
+          example: If the account exists, a password reset link has been generated
+        resetToken:
+          type: string
+          example: c4a2a442bc8d00ab1eaf4439d61a4f8dba9d1a6f2df77891d0d65b90b6aa12ff
+
+    SimpleMessageData:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Operation completed successfully
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: Request successful
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          example: Invalid request
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Validation failed
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: fullName
+              message:
+                type: string
+                example: "\"fullName\" is required"
+
 paths:
   /:
     get:
+      tags:
+        - System
       summary: Root endpoint
       responses:
         '200':
           description: API running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
   /api/health:
     get:
+      tags:
+        - System
       summary: Health check
       responses:
         '200':
           description: API healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      description: Register a new user with a university email and strong password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User registered successfully. Please verify your email.
+                  data:
+                    $ref: '#/components/schemas/RegisterResponseData'
+        '400':
+          description: Invalid email domain or weak password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/verify-email:
+    post:
+      tags:
+        - Auth
+      summary: Verify user email
+      description: Verify a user's email address using a verification token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Email verified successfully
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Email verified successfully
+                      user:
+                        $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid, used, or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/resend-verification:
+    post:
+      tags:
+        - Auth
+      summary: Resend verification email
+      description: Generate a fresh email verification token for an unverified account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+      responses:
+        '200':
+          description: Verification email resent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Verification email has been resent
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: Verification email has been resent
+                      verificationToken:
+                        type: string
+                        example: 9f0d9f1c9b8e6b5a4d3c2b1a0f1234567890abcdef1234567890abcdef1234
+        '400':
+          description: Email already verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      description: Login with verified email and password to receive a JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Login successful
+                  data:
+                    $ref: '#/components/schemas/LoginResponseData'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Email not verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '423':
+          description: Account temporarily locked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout user
+      description: Logout the currently authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Logout successful
+                  data:
+                    $ref: '#/components/schemas/SimpleMessageData'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      tags:
+        - Auth
+      summary: Get current user
+      description: Return the currently authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Current user fetched successfully
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - Auth
+      summary: Forgot password
+      description: Generate a password reset token for an account if it exists
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Password reset flow initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: If the account exists, a password reset link has been generated
+                  data:
+                    $ref: '#/components/schemas/ForgotPasswordResponseData'
+
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Auth
+      summary: Reset password
+      description: Reset the password using a valid reset token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Password reset successfully
+                  data:
+                    $ref: '#/components/schemas/SimpleMessageData'
+        '400':
+          description: Invalid, expired, used token, or weak password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/change-password:
+    post:
+      tags:
+        - Auth
+      summary: Change password
+      description: Change the password for the currently authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Password changed successfully
+                  data:
+                    $ref: '#/components/schemas/SimpleMessageData'
+        '400':
+          description: Current password incorrect or new password weak
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/profiles:
+    post:
+      tags:
+        - Profiles
+      summary: Create profile
+      description: Create a profile for the currently authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProfileRequest'
+      responses:
+        '201':
+          description: Profile created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Profile created successfully
+                  data:
+                    $ref: '#/components/schemas/Profile'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Profile already exists for this user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - Profiles
+      summary: Get all profiles
+      description: Retrieve all profiles
+      responses:
+        '200':
+          description: Profiles fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Profiles fetched successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Profile'
+
+    patch:
+      tags:
+        - Profiles
+      summary: Update own profile
+      description: Update the currently authenticated user's profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Profile updated successfully
+                  data:
+                    $ref: '#/components/schemas/Profile'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Profiles
+      summary: Delete own profile
+      description: Delete the currently authenticated user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Profile deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/profiles/me:
+    get:
+      tags:
+        - Profiles
+      summary: Get own profile
+      description: Retrieve the currently authenticated user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Profile fetched successfully
+                  data:
+                    $ref: '#/components/schemas/Profile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/profiles/{id}:
+    get:
+      tags:
+        - Profiles
+      summary: Get profile by ID
+      description: Retrieve a single profile by its UUID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 7c2d0ad8-7f3c-4fd5-9bd2-0d258c7f8a11
+      responses:
+        '200':
+          description: Profile fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Profile fetched successfully
+                  data:
+                    $ref: '#/components/schemas/Profile'
+        '400':
+          description: Invalid profile ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/degrees:
+    post:
+      tags:
+        - Degrees
+      summary: Create degree
+      description: Create a degree for the currently authenticated user's profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDegreeRequest'
+      responses:
+        '201':
+          description: Degree created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Degree created successfully
+                  data:
+                    $ref: '#/components/schemas/Degree'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/degrees/my:
+    get:
+      tags:
+        - Degrees
+      summary: Get my degrees
+      description: Retrieve all degrees belonging to the currently authenticated user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Degrees fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Degrees fetched successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Degree'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/degrees/profile/{profileId}:
+    get:
+      tags:
+        - Degrees
+      summary: Get degrees by profile ID
+      description: Retrieve all degrees for a given public profile
+      parameters:
+        - in: path
+          name: profileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 7c2d0ad8-7f3c-4fd5-9bd2-0d258c7f8a11
+      responses:
+        '200':
+          description: Degrees fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Degrees fetched successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Degree'
+        '400':
+          description: Invalid profile ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/degrees/{id}:
+    patch:
+      tags:
+        - Degrees
+      summary: Update degree
+      description: Update a degree belonging to the currently authenticated user's profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 2b7eb1a1-b6f6-4dd8-a2f5-7a1f8cc77401
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDegreeRequest'
+      responses:
+        '200':
+          description: Degree updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Degree updated successfully
+                  data:
+                    $ref: '#/components/schemas/Degree'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Degree or profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Degrees
+      summary: Delete degree
+      description: Delete a degree belonging to the currently authenticated user's profile
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 2b7eb1a1-b6f6-4dd8-a2f5-7a1f8cc77401
+      responses:
+        '200':
+          description: Degree deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Degree deleted successfully
+        '400':
+          description: Invalid degree ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Degree or profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

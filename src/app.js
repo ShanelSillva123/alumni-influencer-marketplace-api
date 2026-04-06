@@ -8,6 +8,8 @@ const { swaggerUi, swaggerDocument } = require('./config/swagger');
 const { apiLimiter } = require('./middleware/rateLimit.middleware');
 const notFoundMiddleware = require('./middleware/notFound.middleware');
 const errorMiddleware = require('./middleware/error.middleware');
+const startJobs = require('./jobs');
+const publicRoutes = require('./routes/public.index');
 
 const app = express();
 
@@ -26,8 +28,10 @@ app.get('/', (req, res) => {
 
 app.use('/api', apiLimiter, routes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api/public', publicRoutes);
+
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
-
+startJobs();
 module.exports = app;
