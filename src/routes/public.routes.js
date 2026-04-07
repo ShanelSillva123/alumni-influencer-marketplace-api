@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const publicCertificationController = require('../controllers/publicCertification.controller');
+const publicCertificationController = require('../controllers/public.controller');
 const validate = require('../middleware/validate.middleware');
 
 const { profileIdParam } = require('../utils/validators');

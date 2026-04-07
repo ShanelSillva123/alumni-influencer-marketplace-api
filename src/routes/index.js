@@ -38,4 +38,3 @@ router.use('/admin', adminRoutes);
 router.use('/api-keys', apiKeyRoutes);
 
 module.exports = router;
-module.exports = startJobs;

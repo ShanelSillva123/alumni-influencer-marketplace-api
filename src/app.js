@@ -60,22 +60,17 @@ app.use('/api/public', publicRoutes);
 // 🔹 Auth routes (STRICT rate limit)
 app.use('/api/auth', authLimiter, require('./routes/auth.routes'));
 
-// 🔹 API Key routes (STRICT rate limit)
 app.use('/api/api-keys', apiKeyLimiter, require('./routes/apiKey.routes'));
 
-// 🔹 General API
 app.use('/api', apiLimiter, routes);
 
 // 📘 Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// ❌ Not found
 app.use(notFoundMiddleware);
 
-// ❌ Error handler
 app.use(errorMiddleware);
 
-// ⚙️ Background jobs
 startJobs();
 
 module.exports = app;
