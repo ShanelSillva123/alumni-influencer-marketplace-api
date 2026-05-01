@@ -1,34 +1,37 @@
-const express = require('express');
+// src/routes/admin.routes.js
+
+const express = require("express");
 const router = express.Router();
 
-const adminController = require('../controllers/admin.controller');
-const { authMiddleware, authorizeRoles } = require('../middleware/auth.middleware');
+const adminController = require("../controllers/admin.controller");
+const { authMiddleware } = require("../middleware/auth.middleware");
+const authorizeRoles = require("../middleware/role.middleware");
 
 router.get(
-    '/users',
+    "/users",
     authMiddleware,
-    authorizeRoles('ADMIN'),
+    authorizeRoles("ADMIN"),
     adminController.getAllUsers
 );
 
 router.get(
-    '/bids',
+    "/bids",
     authMiddleware,
-    authorizeRoles('ADMIN'),
+    authorizeRoles("ADMIN"),
     adminController.getAllBids
 );
 
 router.get(
-    '/notifications',
+    "/notifications",
     authMiddleware,
-    authorizeRoles('ADMIN'),
+    authorizeRoles("ADMIN"),
     adminController.getAllNotifications
 );
 
 router.get(
-    '/dashboard',
+    "/dashboard",
     authMiddleware,
-    authorizeRoles('ADMIN'),
+    authorizeRoles("ADMIN"),
     adminController.getAdminDashboard
 );
 

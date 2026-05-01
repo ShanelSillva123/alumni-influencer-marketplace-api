@@ -20,7 +20,7 @@ const getMyDegrees = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: 'Degrees fetched successfully',
+            message: 'Degrees.jsx fetched successfully',
             data: degrees,
         });
     } catch (error) {
@@ -34,7 +34,7 @@ const getDegreesByProfileId = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            message: 'Degrees fetched successfully',
+            message: 'Degrees.jsx fetched successfully',
             data: degrees,
         });
     } catch (error) {

@@ -15,10 +15,9 @@ const createDegree = async (data) => {
 const findDegreesByProfileId = async (profileId) => {
     return prisma.degree.findMany({
         where: { profileId },
-        orderBy: { startDate: 'desc' },
+        orderBy: { completionDate: "desc" },
     });
 };
-
 /**
  * Find degree by ID
  */

@@ -6,10 +6,9 @@ const prisma = require('../models/prisma');
 
 const findUserByEmail = async (email) => {
     return prisma.user.findUnique({
-        where: { email }
+        where: { email },
     });
 };
-
 const findUserById = async (id) => {
     return prisma.user.findUnique({
         where: { id }

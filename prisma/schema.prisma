@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -160,10 +161,12 @@ model FeaturedAlumnusDaily {
 }
 
 model ApiKey {
-  id         String    @id @default(uuid())
-  userId     String
-  name       String
-  key        String    @unique
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  key         String   @unique
+  permissions String[] @default([])
+
   isActive   Boolean   @default(true)
   lastUsedAt DateTime?
   revokedAt  DateTime?
@@ -266,6 +269,7 @@ enum BidStatus {
   LOST
   CANCELLED
 }
+
 enum AuthAction {
   REGISTER
   VERIFY_EMAIL

@@ -1,9 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const publicCertificationRoutes = require('./public.routes');
-// add others later (degrees, employment, etc.)
+const publicRoutes = require("./public.routes");
 
-router.use('/', publicCertificationRoutes);
+router.use("/", publicRoutes);
 
 module.exports = router;

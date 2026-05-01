@@ -15,7 +15,7 @@ tags:
     description: Authentication and account management
   - name: Profiles
     description: Profile management endpoints
-  - name: Degrees
+  - name: Degrees.jsx
     description: Degree management endpoints
   - name: Employment
     description: Employment history management endpoints
@@ -1353,7 +1353,7 @@ paths:
   /api/degrees:
     post:
       tags:
-        - Degrees
+        - Degrees.jsx
       summary: Create degree
       security:
         - bearerAuth: []
@@ -1374,13 +1374,13 @@ paths:
   /api/degrees/my:
     get:
       tags:
-        - Degrees
+        - Degrees.jsx
       summary: Get my degrees
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Degrees fetched
+          description: Degrees.jsx fetched
           content:
             application/json:
               schema:
@@ -1389,7 +1389,7 @@ paths:
   /api/degrees/profile/{profileId}:
     get:
       tags:
-        - Degrees
+        - Degrees.jsx
       summary: Get degrees by profile ID
       parameters:
         - in: path
@@ -1400,7 +1400,7 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Degrees fetched
+          description: Degrees.jsx fetched
           content:
             application/json:
               schema:
@@ -1409,7 +1409,7 @@ paths:
   /api/degrees/{id}:
     patch:
       tags:
-        - Degrees
+        - Degrees.jsx
       summary: Update degree
       security:
         - bearerAuth: []
@@ -1435,7 +1435,7 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
     delete:
       tags:
-        - Degrees
+        - Degrees.jsx
       summary: Delete degree
       security:
         - bearerAuth: []

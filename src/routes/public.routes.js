@@ -1,15 +1,13 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const publicCertificationController = require('../controllers/public.controller');
-const validate = require('../middleware/validate.middleware');
-
-const { profileIdParam } = require('../utils/validators');
+const publicController = require("../controllers/public.controller");
+const requireApiKeyPermission = require("../middleware/apiKeyAuth.middleware");
 
 router.get(
-    '/profiles/:profileId/certifications',
-    validate(profileIdParam, 'params'),
-    publicCertificationController.getCertificationsByProfileId
+    "/profiles/:profileId/certifications",
+    requireApiKeyPermission("read:alumni"),
+    publicController.getCertificationsByProfileId
 );
 
 module.exports = router;
