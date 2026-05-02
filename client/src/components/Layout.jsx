@@ -42,7 +42,7 @@ function Layout() {
         { path: "/alumni", label: "Alumni", icon: GraduationCap },
         { path: "/profile", label: "My Profile", icon: UserCircle },
 
-        { path: "/degrees", label: "Degrees.jsx", icon: GraduationCap },
+        { path: "/degrees", label: "Degrees", icon: GraduationCap },
         { path: "/employment", label: "Employment", icon: BriefcaseBusiness },
         { path: "/certifications", label: "Certifications", icon: Award },
         { path: "/courses", label: "Courses", icon: BookOpen },
