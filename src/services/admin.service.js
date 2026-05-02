@@ -65,9 +65,18 @@ const getAdminDashboard = async (adminUserId) => {
     };
 };
 
+/**
+ * ✅ NEW — API Key Usage Stats (ADMIN ONLY)
+ */
+const getApiKeyUsageStats = async (adminUserId) => {
+    await ensureAdminUser(adminUserId);
+    return adminRepository.findApiKeyUsageStats();
+};
+
 module.exports = {
     getAllUsers,
     getAllBids,
     getAllNotifications,
     getAdminDashboard,
+    getApiKeyUsageStats, // ✅ added
 };

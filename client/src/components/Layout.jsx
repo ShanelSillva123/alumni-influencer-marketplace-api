@@ -51,7 +51,10 @@ function Layout() {
         { path: "/bids", label: "Bids", icon: CreditCard },
         { path: "/notifications", label: "Notifications", icon: Bell },
         { path: "/api-keys", label: "API Keys", icon: KeyRound },
-        { path: "/admin", label: "Admin", icon: Shield },
+
+        ...(user?.role === "ADMIN"
+            ? [{ path: "/admin", label: "Admin", icon: Shield }]
+            : []),
     ];
 
     const handleLogout = async () => {

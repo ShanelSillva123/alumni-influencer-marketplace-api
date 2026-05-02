@@ -37,27 +37,21 @@ const updateProfile = Joi.object({
 ========================= */
 
 const createDegree = Joi.object({
-    institution: Joi.string().trim().min(2).max(150).required(),
-    degreeName: Joi.string().trim().min(2).max(150).required(),
-    fieldOfStudy: Joi.string().trim().max(150).allow('', null),
-    startDate: Joi.date().iso().required(),
-    endDate: Joi.date().iso().allow(null),
-    grade: Joi.string().trim().max(50).allow('', null),
-    description: Joi.string().trim().max(2000).allow('', null),
+    title: Joi.string().trim().min(2).max(150).required(),
+    institutionName: Joi.string().trim().min(2).max(150).required(),
+    degreeUrl: Joi.string().uri().allow("", null),
+    completionDate: Joi.date().iso().allow(null),
 });
 
 const updateDegree = Joi.object({
-    institution: Joi.string().trim().min(2).max(150),
-    degreeName: Joi.string().trim().min(2).max(150),
-    fieldOfStudy: Joi.string().trim().max(150).allow('', null),
-    startDate: Joi.date().iso(),
-    endDate: Joi.date().iso().allow(null),
-    grade: Joi.string().trim().max(50).allow('', null),
-    description: Joi.string().trim().max(2000).allow('', null),
+    title: Joi.string().trim().min(2).max(150),
+    institutionName: Joi.string().trim().min(2).max(150),
+    degreeUrl: Joi.string().uri().allow("", null),
+    completionDate: Joi.date().iso().allow(null),
 })
     .min(1)
     .messages({
-        'object.min': 'At least one field must be provided for update',
+        "object.min": "At least one field must be provided for update",
     });
 
 const degreeIdParam = Joi.object({

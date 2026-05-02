@@ -1,5 +1,6 @@
 const biddingRepository = require('../repositories/bidding.repository');
 const authRepository = require('../repositories/auth.repository');
+const prisma = require('../models/prisma');
 
 const getTomorrowBidDate = () => {
     const tomorrow = new Date();
@@ -32,16 +33,56 @@ const ensureBidExistsForUser = async (userId, bidId) => {
     return bid;
 };
 
+const ensureMonthlyWinLimitNotExceeded = async (userId) => {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const endOfMonth = new Date(startOfMonth);
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+
+    const monthlyWins = await prisma.bid.count({
+        where: {
+            userId,
+            status: 'WON',
+            updatedAt: {
+                gte: startOfMonth,
+                lt: endOfMonth,
+            },
+        },
+    });
+
+    if (monthlyWins >= 3) {
+        const error = new Error(
+            'Monthly bidding limit reached. You can only win 3 featured slots per month.'
+        );
+        error.statusCode = 403;
+        throw error;
+    }
+};
+
 const createBid = async (userId, payload) => {
     await ensureUserExists(userId);
+    await ensureMonthlyWinLimitNotExceeded(userId);
 
-    return biddingRepository.createBid({
+    const bid = await biddingRepository.createBid({
         userId,
         bidDate: getTomorrowBidDate(),
         amount: payload.amount,
         status: 'PENDING',
         isActive: true,
     });
+
+    await prisma.notification.create({
+        data: {
+            userId,
+            title: 'Bid placed',
+            message: `Your bid of £${payload.amount} has been placed successfully.`,
+            type: 'BID_STATUS',
+        },
+    });
+
+    return bid;
 };
 
 const getMyBids = async (userId) => {
@@ -87,7 +128,20 @@ const updateBid = async (userId, bidId, payload) => {
         updateData.amount = payload.amount;
     }
 
-    return biddingRepository.updateBid(bidId, updateData);
+    const updatedBid = await biddingRepository.updateBid(bidId, updateData);
+
+    if (payload.amount !== undefined) {
+        await prisma.notification.create({
+            data: {
+                userId,
+                title: 'Bid updated',
+                message: `Your bid has been updated to £${payload.amount}.`,
+                type: 'BID_STATUS',
+            },
+        });
+    }
+
+    return updatedBid;
 };
 
 const deactivateBid = async (userId, bidId) => {
@@ -103,10 +157,21 @@ const deactivateBid = async (userId, bidId) => {
         throw error;
     }
 
-    return biddingRepository.updateBid(bidId, {
+    const updatedBid = await biddingRepository.updateBid(bidId, {
         isActive: false,
         status: 'CANCELLED',
     });
+
+    await prisma.notification.create({
+        data: {
+            userId,
+            title: 'Bid deactivated',
+            message: 'Your bid has been successfully deactivated.',
+            type: 'BID_STATUS',
+        },
+    });
+
+    return updatedBid;
 };
 
 const deleteBid = async (userId, bidId) => {

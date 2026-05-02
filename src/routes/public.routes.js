@@ -10,4 +10,10 @@ router.get(
     publicController.getCertificationsByProfileId
 );
 
+router.get(
+    "/alumni-of-day",
+    requireApiKeyPermission("read:alumni_of_day"),
+    publicController.getAlumniOfTheDay
+);
+
 module.exports = router;

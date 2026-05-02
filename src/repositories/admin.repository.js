@@ -51,6 +51,50 @@ const findAllNotifications = async () => {
     });
 };
 
+const findApiKeyUsageStats = async () => {
+    return prisma.apiKey.findMany({
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            name: true,
+            key: true,
+            isActive: true,
+            lastUsedAt: true,
+            revokedAt: true,
+            createdAt: true,
+            updatedAt: true,
+            user: {
+                select: {
+                    id: true,
+                    email: true,
+                    role: true,
+                },
+            },
+            usageLogs: {
+                orderBy: {
+                    usedAt: 'desc',
+                },
+                take: 5,
+                select: {
+                    id: true,
+                    endpoint: true,
+                    method: true,
+                    ipAddress: true,
+                    userAgent: true,
+                    usedAt: true,
+                },
+            },
+            _count: {
+                select: {
+                    usageLogs: true,
+                },
+            },
+        },
+    });
+};
+
 const countUsers = async () => {
     return prisma.user.count();
 };
@@ -71,6 +115,7 @@ module.exports = {
     findAllUsers,
     findAllBids,
     findAllNotifications,
+    findApiKeyUsageStats,
     countUsers,
     countProfiles,
     countBids,

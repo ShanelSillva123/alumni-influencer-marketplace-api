@@ -22,7 +22,7 @@ function Courses() {
             const res = await apiClient.get("/courses/my");
             setItems(res.data?.data || []);
         } catch (err) {
-            setError("Failed to load courses.");
+            setError(err.response?.data?.message || "Failed to load courses.");
         } finally {
             setLoading(false);
         }
@@ -63,24 +63,24 @@ function Courses() {
         try {
             if (editingId) {
                 await apiClient.patch(`/courses/${editingId}`, payload);
-                setMessage("Course updated.");
+                setMessage("Course updated successfully.");
             } else {
                 await apiClient.post("/courses", payload);
-                setMessage("Course added.");
+                setMessage("Course added successfully.");
             }
 
             resetForm();
             loadItems();
-        } catch {
-            setError("Save failed.");
+        } catch (err) {
+            setError(err.response?.data?.message || "Save failed.");
         }
     };
 
     const startEdit = (item) => {
         setEditingId(item.id);
         setForm({
-            title: item.title,
-            providerName: item.providerName,
+            title: item.title || "",
+            providerName: item.providerName || "",
             courseUrl: item.courseUrl || "",
             completionDate: item.completionDate
                 ? item.completionDate.slice(0, 10)
@@ -89,8 +89,17 @@ function Courses() {
     };
 
     const deleteItem = async (id) => {
-        await apiClient.delete(`/courses/${id}`);
-        loadItems();
+        if (!window.confirm("Delete this course?")) return;
+
+        try {
+            setError("");
+            setMessage("");
+            await apiClient.delete(`/courses/${id}`);
+            setMessage("Course deleted successfully.");
+            loadItems();
+        } catch (err) {
+            setError(err.response?.data?.message || "Delete failed.");
+        }
     };
 
     if (loading) return <p>Loading courses...</p>;
@@ -99,7 +108,7 @@ function Courses() {
         <div>
             <div className="section-header">
                 <h2>Courses</h2>
-                <p>Short courses and online learning.</p>
+                <p>Manage short courses, online learning, and professional development.</p>
             </div>
 
             <form className="auth-form" onSubmit={handleSubmit}>
@@ -107,38 +116,117 @@ function Courses() {
                 {message && <div className="auth-success">{message}</div>}
 
                 <div className="form-group">
-                    <input name="title" placeholder="Course title" value={form.title} onChange={handleChange}/>
+                    <label>Course Title</label>
+                    <input
+                        name="title"
+                        placeholder="Advanced Node.js"
+                        value={form.title}
+                        onChange={handleChange}
+                    />
                 </div>
 
                 <div className="form-group">
-                    <input name="providerName" placeholder="Provider" value={form.providerName} onChange={handleChange}/>
+                    <label>Provider</label>
+                    <input
+                        name="providerName"
+                        placeholder="Coursera / Udemy / LinkedIn Learning"
+                        value={form.providerName}
+                        onChange={handleChange}
+                    />
                 </div>
 
                 <div className="form-group">
-                    <input name="courseUrl" placeholder="URL" value={form.courseUrl} onChange={handleChange}/>
+                    <label>Course URL</label>
+                    <input
+                        name="courseUrl"
+                        placeholder="https://example.com/course"
+                        value={form.courseUrl}
+                        onChange={handleChange}
+                    />
                 </div>
 
                 <div className="form-group">
-                    <input type="date" name="completionDate" value={form.completionDate} onChange={handleChange}/>
+                    <label>Completion Date</label>
+                    <input
+                        type="date"
+                        name="completionDate"
+                        value={form.completionDate}
+                        onChange={handleChange}
+                    />
                 </div>
 
                 <button className="primary-btn">
-                    {editingId ? "Update" : "Add"}
+                    {editingId ? "Update Course" : "Add Course"}
                 </button>
+
+                {editingId && (
+                    <button type="button" className="secondary-btn" onClick={resetForm}>
+                        Cancel Edit
+                    </button>
+                )}
             </form>
 
+            <div className="section-header" style={{ marginTop: 28 }}>
+                <h2>My Courses</h2>
+            </div>
+
             <table className="alumni-table">
+                <thead>
+                <tr>
+                    <th>Course Title</th>
+                    <th>Provider</th>
+                    <th>URL</th>
+                    <th>Completion Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
                 <tbody>
-                {items.map((item) => (
-                    <tr key={item.id}>
-                        <td>{item.title}</td>
-                        <td>{item.providerName}</td>
-                        <td>
-                            <button onClick={() => startEdit(item)}>Edit</button>
-                            <button onClick={() => deleteItem(item.id)}>Delete</button>
-                        </td>
+                {items.length === 0 ? (
+                    <tr>
+                        <td colSpan="5">No courses found.</td>
                     </tr>
-                ))}
+                ) : (
+                    items.map((item) => (
+                        <tr key={item.id}>
+                            <td>{item.title}</td>
+                            <td>{item.providerName}</td>
+                            <td>
+                                {item.courseUrl ? (
+                                    <a href={item.courseUrl} target="_blank" rel="noreferrer">
+                                        View Course
+                                    </a>
+                                ) : (
+                                    "N/A"
+                                )}
+                            </td>
+                            <td>
+                                {item.completionDate
+                                    ? new Date(item.completionDate).toLocaleDateString()
+                                    : "N/A"}
+                            </td>
+                            <td>
+                                <div className="action-group">
+                                    <button
+                                        type="button"
+                                        className="small-primary-btn"
+                                        onClick={() => startEdit(item)}
+                                    >
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="small-danger-btn"
+                                        onClick={() => deleteItem(item.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))
+                )}
                 </tbody>
             </table>
         </div>

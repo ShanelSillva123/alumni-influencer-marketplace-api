@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     BarChart,
     Bar,
@@ -12,6 +12,8 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import apiClient from "../api/apiClient";
+
+const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4"];
 
 const exportToCSV = (filename, rows) => {
     if (!rows || rows.length === 0) return;
@@ -36,16 +38,37 @@ const exportToCSV = (filename, rows) => {
     URL.revokeObjectURL(url);
 };
 
+const countByField = (items, fieldName, fallback = "Not provided") => {
+    const counts = {};
+
+    items.forEach((item) => {
+        const value = item[fieldName] || fallback;
+        counts[value] = (counts[value] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+};
+
 function Analytics() {
     const [analytics, setAnalytics] = useState(null);
+    const [profiles, setProfiles] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
         const loadAnalytics = async () => {
             try {
-                const res = await apiClient.get("/analytics/my-dashboard");
-                setAnalytics(res.data?.data || null);
+                const [analyticsRes, profilesRes] = await Promise.all([
+                    apiClient.get("/analytics/my-dashboard"),
+                    apiClient.get("/profiles"),
+                ]);
+
+                setAnalytics(analyticsRes.data?.data || null);
+                setProfiles(profilesRes.data?.data || []);
             } catch (err) {
                 setError(err.response?.data?.message || "Failed to load analytics.");
             } finally {
@@ -56,13 +79,9 @@ function Analytics() {
         loadAnalytics();
     }, []);
 
-    if (loading) return <p>Loading analytics...</p>;
-    if (error) return <div className="auth-error">{error}</div>;
-    if (!analytics) return <p>No analytics data available.</p>;
-
-    const profile = analytics.profile || {};
-    const bids = analytics.bids || {};
-    const notifications = analytics.notifications || {};
+    const profile = analytics?.profile || {};
+    const bids = analytics?.bids || {};
+    const notifications = analytics?.notifications || {};
 
     const completeness = Number(profile.completenessPercentage || 0);
 
@@ -91,74 +110,48 @@ function Analytics() {
         { name: "Unread", value: notifications.unread || 0 },
     ];
 
-    const analyticsExportRows = [
-        {
-            metric: "Profile Completion",
-            value: `${completeness}%`,
-        },
-        {
-            metric: "Degrees",
-            value: profile.totalDegrees || 0,
-        },
-        {
-            metric: "Employment Records",
-            value: profile.totalEmploymentHistory || 0,
-        },
-        {
-            metric: "Certifications",
-            value: profile.totalCertifications || 0,
-        },
-        {
-            metric: "Courses",
-            value: profile.totalCourses || 0,
-        },
-        {
-            metric: "Licences",
-            value: profile.totalLicences || 0,
-        },
-        {
-            metric: "Total Bids",
-            value: bids.total || 0,
-        },
-        {
-            metric: "Active Bids",
-            value: bids.active || 0,
-        },
-        {
-            metric: "Won Bids",
-            value: bids.won || 0,
-        },
-        {
-            metric: "Lost Bids",
-            value: bids.lost || 0,
-        },
-        {
-            metric: "Cancelled Bids",
-            value: bids.cancelled || 0,
-        },
-        {
-            metric: "Total Notifications",
-            value: notifications.total || 0,
-        },
-        {
-            metric: "Read Notifications",
-            value: notifications.read || 0,
-        },
-        {
-            metric: "Unread Notifications",
-            value: notifications.unread || 0,
-        },
+    const topCompaniesData = useMemo(() => {
+        return countByField(profiles, "currentCompany");
+    }, [profiles]);
+
+    const topJobTitlesData = useMemo(() => {
+        return countByField(profiles, "currentJobTitle");
+    }, [profiles]);
+
+    const professionalDevelopmentData = [
+        { name: "Certifications", count: profile.totalCertifications || 0 },
+        { name: "Courses", count: profile.totalCourses || 0 },
+        { name: "Licences", count: profile.totalLicences || 0 },
     ];
 
-    const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4"];
+    const analyticsExportRows = [
+        { metric: "Profile Completion", value: `${completeness}%` },
+        { metric: "Degrees", value: profile.totalDegrees || 0 },
+        { metric: "Employment Records", value: profile.totalEmploymentHistory || 0 },
+        { metric: "Certifications", value: profile.totalCertifications || 0 },
+        { metric: "Courses", value: profile.totalCourses || 0 },
+        { metric: "Licences", value: profile.totalLicences || 0 },
+        { metric: "Total Bids", value: bids.total || 0 },
+        { metric: "Active Bids", value: bids.active || 0 },
+        { metric: "Won Bids", value: bids.won || 0 },
+        { metric: "Lost Bids", value: bids.lost || 0 },
+        { metric: "Cancelled Bids", value: bids.cancelled || 0 },
+        { metric: "Total Notifications", value: notifications.total || 0 },
+        { metric: "Read Notifications", value: notifications.read || 0 },
+        { metric: "Unread Notifications", value: notifications.unread || 0 },
+    ];
+
+    if (loading) return <p>Loading analytics...</p>;
+    if (error) return <div className="auth-error">{error}</div>;
+    if (!analytics) return <p>No analytics data available.</p>;
 
     return (
         <div>
             <div className="section-header">
                 <h2>Analytics & Intelligence</h2>
                 <p>
-                    Live analytics generated from alumni profile, bidding, notification,
-                    and professional development data.
+                    Live analytics generated from alumni profiles, bidding, notifications,
+                    and professional development records.
                 </p>
 
                 <button
@@ -248,7 +241,7 @@ function Analytics() {
 
             <div className="charts-grid">
                 <div className="chart-card">
-                    <h3>Profile Completion</h3>
+                    <h3>1. Profile Completion</h3>
                     <ResponsiveContainer width="100%" height={280}>
                         <PieChart>
                             <Pie
@@ -272,7 +265,7 @@ function Analytics() {
                 </div>
 
                 <div className="chart-card">
-                    <h3>Profile Data Breakdown</h3>
+                    <h3>2. Profile Data Breakdown</h3>
                     <ResponsiveContainer width="100%" height={280}>
                         <BarChart data={profileBreakdownData}>
                             <XAxis dataKey="name" />
@@ -285,7 +278,7 @@ function Analytics() {
                 </div>
 
                 <div className="chart-card">
-                    <h3>Bid Status Distribution</h3>
+                    <h3>3. Bid Status Distribution</h3>
                     <ResponsiveContainer width="100%" height={280}>
                         <PieChart>
                             <Pie
@@ -306,7 +299,7 @@ function Analytics() {
                 </div>
 
                 <div className="chart-card">
-                    <h3>Notification Engagement</h3>
+                    <h3>4. Notification Engagement</h3>
                     <ResponsiveContainer width="100%" height={280}>
                         <PieChart>
                             <Pie
@@ -326,6 +319,45 @@ function Analytics() {
                             <Tooltip />
                             <Legend />
                         </PieChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div className="chart-card">
+                    <h3>5. Top Companies / Employers</h3>
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={topCompaniesData}>
+                            <XAxis dataKey="name" />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="count" name="Alumni" fill="#22c55e" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div className="chart-card">
+                    <h3>6. Top Job Titles</h3>
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={topJobTitlesData}>
+                            <XAxis dataKey="name" />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="count" name="Alumni" fill="#f59e0b" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+
+                <div className="chart-card">
+                    <h3>7. Professional Development Breakdown</h3>
+                    <ResponsiveContainer width="100%" height={280}>
+                        <BarChart data={professionalDevelopmentData}>
+                            <XAxis dataKey="name" />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="count" name="Records" fill="#06b6d4" />
+                        </BarChart>
                     </ResponsiveContainer>
                 </div>
             </div>

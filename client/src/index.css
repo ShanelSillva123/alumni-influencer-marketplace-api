@@ -678,3 +678,16 @@ a {
   color: #6b7280;
   font-size: 13px;
 }
+
+.usage-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.usage-log-item {
+  padding: 8px;
+  border-radius: 8px;
+  background: #f9fafb;
+  font-size: 13px;
+}

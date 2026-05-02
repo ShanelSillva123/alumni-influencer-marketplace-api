@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import apiClient from "../api/apiClient";
+import { useAuth } from "../context/AuthContext";
+
 
 function Bids() {
+    const { user } = useAuth();
     const [bids, setBids] = useState([]);
     const [amount, setAmount] = useState("");
     const [showActiveOnly, setShowActiveOnly] = useState(false);
@@ -10,6 +13,7 @@ function Bids() {
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+
 
     const loadBids = async () => {
         try {
@@ -68,6 +72,22 @@ function Bids() {
         }
     };
 
+    const runWinnerSelection = async () => {
+        if (!window.confirm("Run winner selection now?")) return;
+
+        try {
+            setError("");
+            setMessage("");
+
+            const res = await apiClient.post("/admin/run-daily-winner");
+
+            setMessage(res.data?.message || "Winner selection executed.");
+            await loadBids();
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to run winner selection.");
+        }
+    };
+
     if (loading) return <p>Loading bids...</p>;
 
     return (
@@ -93,6 +113,18 @@ function Bids() {
                 <button className="primary-btn" disabled={submitting}>
                     {submitting ? "Placing..." : "Place Bid"}
                 </button>
+
+                {user?.role === "ADMIN" && (
+                    <button
+                        type="button"
+                        className="secondary-btn"
+                        onClick={runWinnerSelection}
+                        style={{ marginTop: "10px" }}
+                    >
+                        Run Winner Selection
+                    </button>
+                )}
+
             </form>
 
             {error && <div className="auth-error">{error}</div>}

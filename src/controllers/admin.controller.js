@@ -56,9 +56,24 @@ const getAdminDashboard = async (req, res, next) => {
     }
 };
 
+const getApiKeyUsageStats = async (req, res, next) => {
+    try {
+        const usageStats = await adminService.getApiKeyUsageStats(req.user.id);
+
+        return res.status(200).json({
+            success: true,
+            message: 'API key usage statistics fetched successfully',
+            data: usageStats,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getAllUsers,
     getAllBids,
     getAllNotifications,
     getAdminDashboard,
+    getApiKeyUsageStats,
 };
