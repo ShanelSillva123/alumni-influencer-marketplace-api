@@ -7,6 +7,12 @@ const adminController = require("../controllers/admin.controller");
 const { authMiddleware } = require("../middleware/auth.middleware");
 const { authorizeRoles } = require("../middleware/role.middleware");
 const dailyWinnerJob = require("../jobs/dailyWinner.job");
+const validate = require("../middleware/validate.middleware");
+
+const {
+    apiKeyIdParam,
+    updateApiKeyPermissions,
+} = require("../utils/validators");
 
 router.get(
     "/users",
@@ -60,6 +66,23 @@ router.get(
     authMiddleware,
     authorizeRoles("ADMIN"),
     adminController.getApiKeyUsageStats
+);
+
+router.patch(
+    "/api-keys/:id/permissions",
+    authMiddleware,
+    authorizeRoles("ADMIN"),
+    validate(apiKeyIdParam, "params"),
+    validate(updateApiKeyPermissions),
+    adminController.updateAnyApiKeyPermissions
+);
+
+router.patch(
+    "/api-keys/:id/revoke",
+    authMiddleware,
+    authorizeRoles("ADMIN"),
+    validate(apiKeyIdParam, "params"),
+    adminController.revokeAnyApiKey
 );
 
 module.exports = router;

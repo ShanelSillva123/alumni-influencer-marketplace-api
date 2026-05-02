@@ -223,6 +223,19 @@ const apiKeyIdParam = Joi.object({
     id: Joi.string().uuid().required(),
 });
 
+const updateApiKeyPermissions = Joi.object({
+    permissions: Joi.array()
+        .items(
+            Joi.string().valid(
+                'read:alumni',
+                'read:analytics',
+                'read:alumni_of_day'
+            )
+        )
+        .min(1)
+        .required(),
+});
+
 
 module.exports = {
     createProfile,
@@ -250,5 +263,6 @@ module.exports = {
     notificationIdParam,
     createApiKey,
     apiKeyIdParam,
+    updateApiKeyPermissions
 
 };

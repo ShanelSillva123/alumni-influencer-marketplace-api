@@ -2,29 +2,36 @@ import { useEffect, useState } from "react";
 import apiClient from "../api/apiClient";
 import { useAuth } from "../context/AuthContext";
 
+const PERMISSIONS = ["read:alumni", "read:analytics", "read:alumni_of_day"];
+
 function ApiKeys() {
     const { user } = useAuth();
 
     const [keys, setKeys] = useState([]);
     const [usageStats, setUsageStats] = useState([]);
-
     const [name, setName] = useState("");
+    const [permissions, setPermissions] = useState([]);
+    const [editingPermissionsId, setEditingPermissionsId] = useState(null);
     const [newKey, setNewKey] = useState("");
-
     const [loading, setLoading] = useState(true);
     const [usageLoading, setUsageLoading] = useState(false);
-
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
 
     const isAdmin = user?.role === "ADMIN";
 
+    const togglePermission = (perm) => {
+        setPermissions((prev) =>
+            prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm]
+        );
+    };
+
     const loadKeys = async () => {
         try {
             const res = await apiClient.get("/api-keys/my");
             setKeys(res.data?.data || []);
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to load API keys.");
+        } catch {
+            setError("Failed to load API keys.");
         } finally {
             setLoading(false);
         }
@@ -37,8 +44,8 @@ function ApiKeys() {
             setUsageLoading(true);
             const res = await apiClient.get("/admin/api-key-usage");
             setUsageStats(res.data?.data || []);
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to load API key usage.");
+        } catch {
+            setError("Failed to load API key usage.");
         } finally {
             setUsageLoading(false);
         }
@@ -64,25 +71,57 @@ function ApiKeys() {
         }
 
         try {
-            const res = await apiClient.post("/api-keys", { name });
+            const res = await apiClient.post("/api-keys", {
+                name,
+                permissions,
+            });
+
             setNewKey(res.data?.data?.key || "");
             setMessage("API key created successfully.");
             setName("");
+            setPermissions([]);
             loadKeys();
             loadUsageStats();
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to create API key.");
+        } catch {
+            setError("Failed to create API key.");
+        }
+    };
+
+    const updatePermissions = async (id) => {
+        try {
+            if (isAdmin) {
+                await apiClient.patch(`/admin/api-keys/${id}/permissions`, {
+                    permissions,
+                });
+            } else {
+                await apiClient.patch(`/api-keys/${id}/permissions`, {
+                    permissions,
+                });
+            }
+
+            setMessage("Permissions updated successfully.");
+            setEditingPermissionsId(null);
+            setPermissions([]);
+            loadKeys();
+            loadUsageStats();
+        } catch {
+            setError("Failed to update permissions.");
         }
     };
 
     const revokeKey = async (id) => {
         try {
-            await apiClient.patch(`/api-keys/${id}/revoke`);
+            if (isAdmin) {
+                await apiClient.patch(`/admin/api-keys/${id}/revoke`);
+            } else {
+                await apiClient.patch(`/api-keys/${id}/revoke`);
+            }
+
             setMessage("API key revoked successfully.");
             loadKeys();
             loadUsageStats();
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to revoke API key.");
+        } catch {
+            setError("Failed to revoke API key.");
         }
     };
 
@@ -94,9 +133,26 @@ function ApiKeys() {
             setMessage("API key deleted successfully.");
             loadKeys();
             loadUsageStats();
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to delete API key.");
+        } catch {
+            setError("Failed to delete API key.");
         }
+    };
+
+    const startPermissionEdit = (item) => {
+        setEditingPermissionsId(item.id);
+        setPermissions(item.permissions || []);
+        setError("");
+        setMessage("");
+    };
+
+    const cancelPermissionEdit = () => {
+        setEditingPermissionsId(null);
+        setPermissions([]);
+    };
+
+    const copyNewKey = async () => {
+        await navigator.clipboard.writeText(newKey);
+        setMessage("API key copied to clipboard.");
     };
 
     if (loading) return <p>Loading API keys...</p>;
@@ -105,16 +161,31 @@ function ApiKeys() {
         <div>
             <div className="section-header">
                 <h2>API Keys</h2>
-                <p>Manage external access keys for dashboard and public integrations.</p>
+                <p>Manage external access keys and scoped permissions.</p>
             </div>
 
-            <form className="inline-form" onSubmit={createKey}>
-                <input
-                    type="text"
-                    placeholder="API key name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
+            <form className="auth-form" onSubmit={createKey}>
+                <div className="form-group">
+                    <label>API Key Name</label>
+                    <input
+                        placeholder="Example: Dashboard Integration Key"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                </div>
+
+                <div className="permissions-box">
+                    {PERMISSIONS.map((perm) => (
+                        <label key={perm} className="permission-item">
+                            <input
+                                type="checkbox"
+                                checked={permissions.includes(perm)}
+                                onChange={() => togglePermission(perm)}
+                            />
+                            <span>{perm}</span>
+                        </label>
+                    ))}
+                </div>
 
                 <button className="primary-btn">Create Key</button>
             </form>
@@ -124,9 +195,13 @@ function ApiKeys() {
 
             {newKey && (
                 <div className="api-key-box">
-                    <strong>New API Key:</strong>
-                    <code>{newKey}</code>
-                    <p>Copy this key now. It may not be shown again.</p>
+                    <strong>New API Key — copy now, it may not be shown again:</strong>
+                    <div className="key-row">
+                        <code>{newKey}</code>
+                        <button type="button" className="secondary-btn" onClick={copyNewKey}>
+                            Copy
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -135,9 +210,9 @@ function ApiKeys() {
                 <tr>
                     <th>Name</th>
                     <th>Key</th>
+                    <th>Permissions</th>
                     <th>Status</th>
                     <th>Last Used</th>
-                    <th>Created</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -156,6 +231,49 @@ function ApiKeys() {
                                 <code>{item.key?.slice(0, 12)}...</code>
                             </td>
 
+                            <td>
+                                {editingPermissionsId === item.id ? (
+                                    <div className="permissions-edit">
+                                        {PERMISSIONS.map((perm) => (
+                                            <label key={perm} className="permission-item">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={permissions.includes(perm)}
+                                                    onChange={() => togglePermission(perm)}
+                                                />
+                                                <span>{perm}</span>
+                                            </label>
+                                        ))}
+
+                                        <button
+                                            type="button"
+                                            className="small-primary-btn"
+                                            onClick={() => updatePermissions(item.id)}
+                                        >
+                                            Save
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="small-danger-btn"
+                                            onClick={cancelPermissionEdit}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="permissions-display">
+                                        {item.permissions?.length
+                                            ? item.permissions.map((perm) => (
+                                                <span key={perm} className="permission-badge">
+                              {perm}
+                            </span>
+                                            ))
+                                            : "None"}
+                                    </div>
+                                )}
+                            </td>
+
                             <td>{item.isActive ? "Active" : "Revoked"}</td>
 
                             <td>
@@ -165,16 +283,19 @@ function ApiKeys() {
                             </td>
 
                             <td>
-                                {item.createdAt
-                                    ? new Date(item.createdAt).toLocaleDateString()
-                                    : "N/A"}
-                            </td>
-
-                            <td>
                                 <div className="action-group">
+                                    <button
+                                        type="button"
+                                        className="small-primary-btn"
+                                        onClick={() => startPermissionEdit(item)}
+                                    >
+                                        Edit Permissions
+                                    </button>
+
                                     {item.isActive && (
                                         <button
-                                            className="small-primary-btn"
+                                            type="button"
+                                            className="small-danger-btn"
                                             onClick={() => revokeKey(item.id)}
                                         >
                                             Revoke
@@ -182,6 +303,7 @@ function ApiKeys() {
                                     )}
 
                                     <button
+                                        type="button"
                                         className="small-danger-btn"
                                         onClick={() => deleteKey(item.id)}
                                     >
@@ -197,34 +319,33 @@ function ApiKeys() {
 
             {isAdmin && (
                 <>
-                    <div className="section-header" style={{ marginTop: 32 }}>
-                        <h2>API Key Usage Statistics</h2>
+                    <div className="section-header" style={{ marginTop: 40 }}>
+                        <h2>API Key Usage</h2>
                         <p>
-                            Admin-only usage monitoring showing endpoint access, method,
-                            timestamp, and usage count.
+                            Admin-only monitoring for API key access, endpoints, methods,
+                            timestamps, and usage counts.
                         </p>
                     </div>
 
                     {usageLoading ? (
-                        <p>Loading usage statistics...</p>
+                        <p>Loading API key usage...</p>
                     ) : (
                         <table className="alumni-table">
                             <thead>
                             <tr>
-                                <th>Owner</th>
-                                <th>Key Name</th>
+                                <th>User</th>
                                 <th>Key</th>
-                                <th>Status</th>
+                                <th>Permissions</th>
                                 <th>Usage Count</th>
                                 <th>Last Used</th>
-                                <th>Recent Endpoint Access</th>
+                                <th>Recent Access Logs</th>
                             </tr>
                             </thead>
 
                             <tbody>
                             {usageStats.length === 0 ? (
                                 <tr>
-                                    <td colSpan="7">No API key usage found.</td>
+                                    <td colSpan="6">No API key usage found.</td>
                                 </tr>
                             ) : (
                                 usageStats.map((item) => (
@@ -232,9 +353,16 @@ function ApiKeys() {
                                         <td>{item.user?.email || "N/A"}</td>
                                         <td>{item.name}</td>
                                         <td>
-                                            <code>{item.key?.slice(0, 12)}...</code>
+                                            <div className="permissions-display">
+                                                {item.permissions?.length
+                                                    ? item.permissions.map((perm) => (
+                                                        <span key={perm} className="permission-badge">
+                                  {perm}
+                                </span>
+                                                    ))
+                                                    : "None"}
+                                            </div>
                                         </td>
-                                        <td>{item.isActive ? "Active" : "Revoked"}</td>
                                         <td>{item._count?.usageLogs || 0}</td>
                                         <td>
                                             {item.lastUsedAt

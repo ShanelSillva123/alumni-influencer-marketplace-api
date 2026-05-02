@@ -70,10 +70,47 @@ const getApiKeyUsageStats = async (req, res, next) => {
     }
 };
 
+const updateAnyApiKeyPermissions = async (req, res, next) => {
+    try {
+        const apiKey = await adminService.updateAnyApiKeyPermissions(
+            req.user.id,
+            req.params.id,
+            req.body.permissions
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'API key permissions updated successfully',
+            data: apiKey,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const revokeAnyApiKey = async (req, res, next) => {
+    try {
+        const apiKey = await adminService.revokeAnyApiKey(
+            req.user.id,
+            req.params.id
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'API key revoked successfully',
+            data: apiKey,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getAllUsers,
     getAllBids,
     getAllNotifications,
     getAdminDashboard,
     getApiKeyUsageStats,
+    updateAnyApiKeyPermissions,
+    revokeAnyApiKey,
 };

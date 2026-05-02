@@ -111,6 +111,23 @@ const countNotifications = async () => {
     return prisma.notification.count();
 };
 
+const updateAnyApiKeyPermissions = async (id, permissions) => {
+    return prisma.apiKey.update({
+        where: { id },
+        data: { permissions },
+    });
+};
+
+const revokeAnyApiKey = async (id) => {
+    return prisma.apiKey.update({
+        where: { id },
+        data: {
+            isActive: false,
+            revokedAt: new Date(),
+        },
+    });
+};
+
 module.exports = {
     findAllUsers,
     findAllBids,
@@ -120,4 +137,6 @@ module.exports = {
     countProfiles,
     countBids,
     countNotifications,
+    updateAnyApiKeyPermissions,
+    revokeAnyApiKey,
 };

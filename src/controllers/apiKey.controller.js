@@ -69,10 +69,29 @@ const deleteApiKey = async (req, res, next) => {
     }
 };
 
+const updateMyApiKeyPermissions = async (req, res, next) => {
+    try {
+        const apiKey = await apiKeyService.updateMyApiKeyPermissions(
+            req.user.id,
+            req.params.id,
+            req.body.permissions
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: 'API key permissions updated successfully',
+            data: apiKey,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     createApiKey,
     getMyApiKeys,
     getMyActiveApiKeys,
     revokeApiKey,
     deleteApiKey,
+    updateMyApiKeyPermissions
 };

@@ -65,12 +65,19 @@ const getAdminDashboard = async (adminUserId) => {
     };
 };
 
-/**
- * ✅ NEW — API Key Usage Stats (ADMIN ONLY)
- */
 const getApiKeyUsageStats = async (adminUserId) => {
     await ensureAdminUser(adminUserId);
     return adminRepository.findApiKeyUsageStats();
+};
+
+const updateAnyApiKeyPermissions = async (adminUserId, apiKeyId, permissions) => {
+    await ensureAdminUser(adminUserId);
+    return adminRepository.updateAnyApiKeyPermissions(apiKeyId, permissions);
+};
+
+const revokeAnyApiKey = async (adminUserId, apiKeyId) => {
+    await ensureAdminUser(adminUserId);
+    return adminRepository.revokeAnyApiKey(apiKeyId);
 };
 
 module.exports = {
@@ -78,5 +85,8 @@ module.exports = {
     getAllBids,
     getAllNotifications,
     getAdminDashboard,
-    getApiKeyUsageStats, // ✅ added
+    getApiKeyUsageStats,
+    updateAnyApiKeyPermissions,
+    revokeAnyApiKey,
 };
+

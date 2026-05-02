@@ -4,6 +4,7 @@ const router = express.Router();
 const apiKeyController = require('../controllers/apiKey.controller');
 const { authMiddleware } = require('../middleware/auth.middleware');
 const validate = require('../middleware/validate.middleware');
+const { updateApiKeyPermissions } = require("../utils/validators");
 
 const {
     createApiKey,
@@ -41,6 +42,14 @@ router.delete(
     authMiddleware,
     validate(apiKeyIdParam, 'params'),
     apiKeyController.deleteApiKey
+);
+
+router.patch(
+    '/:id/permissions',
+    authMiddleware,
+    validate(apiKeyIdParam, 'params'),
+    validate(updateApiKeyPermissions),
+    apiKeyController.updateMyApiKeyPermissions
 );
 
 module.exports = router;

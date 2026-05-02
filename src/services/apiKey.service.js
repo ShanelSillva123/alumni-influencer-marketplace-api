@@ -27,6 +27,28 @@ const ensureApiKeyExistsForUser = async (userId, apiKeyId) => {
     return apiKey;
 };
 
+const updateMyApiKeyPermissions = async (userId, apiKeyId, permissions) => {
+    const existingKey = await apiKeyRepository.findApiKeyByIdAndUserId(
+        apiKeyId,
+        userId
+    );
+
+    if (!existingKey) {
+        const error = new Error('API key not found');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (!existingKey.isActive || existingKey.revokedAt) {
+        const error = new Error('Cannot update permissions for revoked API key');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    return apiKeyRepository.updateApiKeyPermissions(apiKeyId, permissions);
+};
+
+
 const generateUniqueApiKey = async () => {
     let generatedKey;
     let existingKey;
@@ -82,4 +104,5 @@ module.exports = {
     getMyActiveApiKeys,
     revokeApiKey,
     deleteApiKey,
+    updateMyApiKeyPermissions,
 };

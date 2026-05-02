@@ -691,3 +691,50 @@ a {
   background: #f9fafb;
   font-size: 13px;
 }
+
+.permissions-box,
+.permissions-edit,
+.permissions-display,
+.action-group,
+.key-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.permission-badge {
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.key-row {
+  margin-top: 10px;
+}
+
+.key-row code {
+  word-break: break-all;
+}
+
+.usage-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.usage-log-item {
+  padding: 8px;
+  border-radius: 8px;
+  background: #f9fafb;
+  font-size: 13px;
+}

@@ -65,6 +65,14 @@ const deleteApiKey = async (id) => {
     });
 };
 
+
+const updateApiKeyPermissions = async (id, permissions) => {
+    return prisma.apiKey.update({
+        where: { id },
+        data: { permissions },
+    });
+};
+
 module.exports = {
     createApiKey,
     findApiKeysByUserId,
@@ -74,4 +82,5 @@ module.exports = {
     updateApiKey,
     revokeApiKey,
     deleteApiKey,
+    updateApiKeyPermissions,
 };
